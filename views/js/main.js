@@ -1,23 +1,6 @@
-/*
-Welcome to the 60fps project! Your goal is to make Cam's Pizzeria website run
-jank-free at 60 frames per second.
+// Welcome to my edited project! I've included my notes within
+// comments throughout this file! :) 
 
-There are two major issues in this code that lead to sub-60fps performance. Can
-you spot and fix both?
-
-
-Built into the code, you'll find a few instances of the User Timing API
-(window.performance), which will be console.log()ing frame rate data into the
-browser console. To learn more about User Timing API, check out:
-http://www.html5rocks.com/en/tutorials/webperformance/usertiming/
-
-Creator:
-Cameron Pittman, Udacity Course Developer
-cameron *at* udacity *dot* com
-*/
-
-// As you may have realized, this website randomly generates pizzas.
-// Here are arrays of all possible pizza ingredients.
 var pizzaIngredients = {};
 pizzaIngredients.meats = [
   "Pepperoni",
@@ -285,7 +268,6 @@ function getNoun(y) {
 var adjectives = ["dark", "color", "whimsical", "shiny", "noisy", "apocalyptic", "insulting", "praise", "scientific"];  // types of adjectives for pizza titles
 var nouns = ["animals", "everyday", "fantasy", "gross", "horror", "jewelry", "places", "scifi"];                        // types of nouns for pizza titles
 
-// Generates random numbers for getAdj and getNoun functions and returns a new pizza name
 function generator(adj, noun) {
   var adjectives = getAdj(adj);
   var nouns = getNoun(noun);
@@ -295,14 +277,12 @@ function generator(adj, noun) {
   return name;
 }
 
-// Chooses random adjective and random noun
 function randomName() {
   var randomNumberAdj = parseInt(Math.random() * adjectives.length);
   var randomNumberNoun = parseInt(Math.random() * nouns.length);
   return generator(adjectives[randomNumberAdj], nouns[randomNumberNoun]);
 }
 
-// These functions return a string of a random ingredient from each respective category of ingredients.
 var selectRandomMeat = function() {
   var randomMeat = pizzaIngredients.meats[Math.floor((Math.random() * pizzaIngredients.meats.length))];
   return randomMeat;
@@ -332,7 +312,6 @@ var ingredientItemizer = function(string) {
   return "<li>" + string + "</li>";
 };
 
-// Returns a string with random pizza ingredients nested inside <li> tags
 var makeRandomPizza = function() {
   var pizza = "";
 
@@ -358,7 +337,6 @@ var makeRandomPizza = function() {
   return pizza;
 };
 
-// returns a DOM element for each pizza
 var pizzaElementGenerator = function(i) {
   var pizzaContainer,             // contains pizza title, image and list of ingredients
       pizzaImageContainer,        // contains the pizza image
@@ -398,53 +376,74 @@ var pizzaElementGenerator = function(i) {
   return pizzaContainer;
 };
 
-// resizePizzas(size) is called when the slider in the "Our Pizzas" section of the website moves.
 var resizePizzas = function(size) {
   window.performance.mark("mark_start_resize");   // User Timing API function
 
   var pizzaSizeHTML = document.getElementById("pizzaSize");
-  var pizzaContainerSize = "";
   var allPizzaContainers = document.getElementsByClassName("randomPizzaContainer");
+  // In the above code, I consolidated the variables that need to access
+  // the DOM, and I leaned on the methods "getElementsByClassName"
+  // and "getElementById" instead of the more expensive selector methods
 
-  // Changes the value for the size of the pizza above the slider
-  function changeSliderLabel(size) {
+
+  // I refactored the resizePizzas function so that the browser is
+  // FAR more efficient!
+  // Originally, the JS had the browser find the origial sizes, calculate
+  // pixel changes, and other unnecessary calculations!
+  // With the refactored code, I  apply a percentage width to the
+  // pizzaContainer elements depending on the slider value.
+  function iterateThroughPizzaContainers(size) {
+    var pizzaContainerSize = "";
+      switch(size) {
+        case "1":
+          pizzaContainerSize = "25%";
+          break;
+        case "2":
+          pizzaContainerSize = "33.33%";
+          break;
+        case "3":
+          pizzaContainerSize = "50%";
+          break;
+        default:
+          console.log("bug in iterateThroughPizzaContainers");
+          return;
+      }
+
+    for (var i=0; i<allPizzaContainers.length; i++) {
+      allPizzaContainers[i].style.width = pizzaContainerSize;
+    }
+    // Previously, the for loop was very expensive, calling for
+    // unecessary variable declarations and repeitive caluculations
+    // within a long loop. This for loop sets the widths
+    // of pizzaContainers to one variable previously calculated,
+    // helping streamline the pizel pipeline quite a bit :)
+
     switch(size) {
       case "1":
         pizzaSizeHTML.innerHTML = "Small";
-        pizzaContainerSize = "25%";
         return;
       case "2":
         pizzaSizeHTML.innerHTML = "Medium";
-        pizzaContainerSize = "33.33%";
         return;
       case "3":
         pizzaSizeHTML.innerHTML = "Large";
-        pizzaContainerSize = "50%";
         return;
       default:
         console.log("bug in changeSliderLabel");
     }
-  }
+    // This may just be anecdotal, but I found that including this
+    // switch in the original function, instead of calling it separately,
+    // generated slightly lower time to resize pizza numbers
+    // I'm not sure how accurate this claim is though!
 
-  function iterateThroughPizzaContainers(pizzaContainerSize) {
-    if (pizzaContainerSize === "") {
-      console.log("pizzaContainerSize was blank; problem with changeSliderLabel");
-      return;
-    }
-    for (var i=0; i<allPizzaContainers.length; i++) {
-      allPizzaContainers[i].style.width = pizzaContainerSize;
-    }
   };
 
-  changeSliderLabel(size);
-  iterateThroughPizzaContainers(pizzaContainerSize);
+  iterateThroughPizzaContainers(size);
+  // I'm realizing now that I'm calling this function within the
+  // larger function resizePizzas - I'm not sure if this has a big
+  // impact on performance or not!
 
 
-   // Returns the size difference to change a pizza element from one size to another. Called by changePizzaSlices(size).
-
-  //  refactor this so that randomPizzaContainer's width = 1/4, 1/3 or 1/2
-
-  // User Timing API is awesome
   window.performance.mark("mark_end_resize");
   window.performance.measure("measure_pizza_resize", "mark_start_resize", "mark_end_resize");
   var timeToResize = window.performance.getEntriesByName("measure_pizza_resize");
@@ -453,24 +452,25 @@ var resizePizzas = function(size) {
 
 window.performance.mark("mark_start_generating"); // collect timing data
 
-// This for-loop actually creates and appends all of the pizzas when the page loads
 for (var i = 2; i < 100; i++) {
   var pizzasDiv = document.getElementById("randomPizzas");
   pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
+// This function feels like it could use some refactoring of its own
+// as it's going through what seems like an expensive function
+// randomPizzas 97 or so times!
+// I'm not quite sure how to optimize this piece of the code.
+// I would welcome any advice on this :)
 
-// User Timing API again. These measurements tell you how long it took to generate the initial pizzas
+
 window.performance.mark("mark_end_generating");
 window.performance.measure("measure_pizza_generation", "mark_start_generating", "mark_end_generating");
 var timeToGenerate = window.performance.getEntriesByName("measure_pizza_generation");
 console.log("Time to generate pizzas on load: " + timeToGenerate[0].duration + "ms");
 
-// Iterator for number of times the pizzas in the background have scrolled.
-// Used by updatePositions() to decide when to log the average time per frame
 var frame = 0;
 
-// Logs the average amount of time per 10 frames needed to move the sliding background pizzas on scroll.
-function logAverageFrame(times) {   // times is the array of User Timing measurements from updatePositions()
+function logAverageFrame(times) {
   var numberOfEntries = times.length;
   var sum = 0;
   for (var i = numberOfEntries - 1; i > numberOfEntries - 11; i--) {
@@ -479,9 +479,6 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
   console.log("Average scripting time to generate last 10 frames: " + sum / 10 + "ms");
 }
 
-// The following code for sliding background pizzas was pulled from Ilya's demo found at:
-// https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
-
 // Moves the sliding background pizzas based on scroll position
 function updatePositions() {
   frame++;
@@ -489,19 +486,20 @@ function updatePositions() {
 
   // var items = document.querySelectorAll('.mover');
   var items = document.getElementsByClassName("mover");
+  // Replaced querySelectorAll with getElementsByClassName ^^
   var phaseScrollTop = document.body.scrollTop / 1250;
   var phaseArray = [Math.sin(phaseScrollTop),Math.sin(phaseScrollTop+1),Math.sin(phaseScrollTop+2), Math.sin(phaseScrollTop +3), Math.sin(phaseScrollTop +4)];
   // I moved the value of phaseScrollTop to its own variable
   // so that the for loop wouldn't have to create it and
-  // reference layout (is that right?) each time
+  // reference layout each time
   for (var i = 0; i < items.length; i++) {
-    // var phase = Math.sin(phaseScrollTop + (i % 5));
     // items[i].style.left = items[i].basicLeft + 100 * phaseArray[i%5] + 'px';
     items[i].style.transform = "translateX(" + (100 * phaseArray[i%5]) + "px)";
+    // Thanks to the Increasing Framerates video in the course lessons,
+    // I learned about the benefit of TranslateX on reducing
+    // total steps in the pixel pipeline!
   }
 
-  // User Timing API to the rescue again. Seriously, it's worth learning.
-  // Super easy to create custom metrics.
   window.performance.mark("mark_end_frame");
   window.performance.measure("measure_frame_duration", "mark_start_frame", "mark_end_frame");
   if (frame % 10 === 0) {
@@ -513,22 +511,11 @@ function updatePositions() {
 // runs updatePositions on scroll
 window.addEventListener('scroll', function(){
   requestAnimationFrame(updatePositions);
+  // I included requestAnimationFrame to help improve framerate
+  // for rendering updatePositions during scroll
 });
 
-// var myWorker = new Worker("js/worker.js");
-//
-// var cols = 8;
-// myWorker.postMessage(cols);
-//
-//
-// var pizzaChildren = [];
-//
-// myWorker.onMessage = function(e) {
-//   pizzaChildren = e;
-//   console.log(e);
-// };
 
-// Generates the sliding pizzas when the page loads.
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
@@ -539,18 +526,18 @@ document.addEventListener('DOMContentLoaded', function() {
     elem.src = "images/pizza.png";
     elem.style.height = "100px";
     elem.style.width = "73.333px";
-    // elem.basicLeft = (i % cols) * s;
     elem.style.left = (i % cols) * s + "px";
-    // console.log(elem.style.left);
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
     document.querySelector("#movingPizzas1").appendChild(elem);
-    // pizzaChildren.push(elem);
-    // console.log(pizzaChildren);
   }
+  // Truthfully, managing this piece of code stumped me!
+  // I know that this is beyond the scope of the project,
+  // but I'd love to learn the best way to manage
+  // the rendering issues during the initial page load!
+  // I began by trying to include this in its own worker.js file,
+  // but I sense this isn't the most appropriate way to handle
+  // this code.
 
-  // for (var i = 0; i< pizzaChildren.length; i++){
-  //   document.querySelector("#movingPizzas1").appendChild(e[i]);
-  //   }
-  // };
   requestAnimationFrame(updatePositions);
-});
+}
+);
