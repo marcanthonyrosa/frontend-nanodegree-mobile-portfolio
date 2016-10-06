@@ -1,5 +1,5 @@
 // Welcome to my edited project! I've included my notes within
-// comments throughout this file! :) 
+// comments throughout this file! :)
 
 var pizzaIngredients = {};
 pizzaIngredients.meats = [
@@ -386,10 +386,10 @@ var resizePizzas = function(size) {
   // and "getElementById" instead of the more expensive selector methods
 
 
-  // I refactored the resizePizzas function so that the browser is
-  // FAR more efficient!
-  // Originally, the JS had the browser find the origial sizes, calculate
-  // pixel changes, and other unnecessary calculations!
+  // I refactored the resizePizzas function so that the browser
+  // is FAR more efficient!
+  // Originally, the JS had the browser find the origial sizes,
+  // calculate pixel changes, and other unnecessary calculations!
   // With the refactored code, I  apply a percentage width to the
   // pizzaContainer elements depending on the slider value.
   function iterateThroughPizzaContainers(size) {
@@ -488,10 +488,11 @@ function updatePositions() {
   var items = document.getElementsByClassName("mover");
   // Replaced querySelectorAll with getElementsByClassName ^^
   var phaseScrollTop = document.body.scrollTop / 1250;
-  var phaseArray = [Math.sin(phaseScrollTop),Math.sin(phaseScrollTop+1),Math.sin(phaseScrollTop+2), Math.sin(phaseScrollTop +3), Math.sin(phaseScrollTop +4)];
   // I moved the value of phaseScrollTop to its own variable
   // so that the for loop wouldn't have to create it and
   // reference layout each time
+  var phaseArray = [Math.sin(phaseScrollTop),Math.sin(phaseScrollTop+1),Math.sin(phaseScrollTop+2), Math.sin(phaseScrollTop +3), Math.sin(phaseScrollTop +4)];
+
   for (var i = 0; i < items.length; i++) {
     // items[i].style.left = items[i].basicLeft + 100 * phaseArray[i%5] + 'px';
     items[i].style.transform = "translateX(" + (100 * phaseArray[i%5]) + "px)";
